@@ -1,9 +1,7 @@
 {
   "dependencies": {
-    "body-parser": "^1.20.2",
     "express": "^4.18.2",
-    "mongoose": "^7.3.0",
-    "npm-package-json-lint": "^6.4.0"
+    "mongoose": "^7.3.0"
   },
   "devDependencies": {
     "eslint": "^8.2.0",
