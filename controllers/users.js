@@ -45,7 +45,11 @@ const createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((newUser) => res.send({ newUser }))
+    .then((newUser) => {
+      const user = newUser.toObject();
+      delete user.password;
+      return res.send(user);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
@@ -106,7 +110,7 @@ const login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        'dev-secret',
         { expiresIn: '7d' },
       );
       res.cookie('jwt', token, {
