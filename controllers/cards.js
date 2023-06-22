@@ -1,71 +1,79 @@
 const httpConstants = require('http2').constants;
 const Card = require('../models/card');
 
-const getCards = (req, res) => {
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+const ForbiddenError = require('../errors/forbidden-err');
+
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(httpConstants.HTTP_STATUS_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const owner = req.user._id;
   const { name, link } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.status(httpConstants.HTTP_STATUS_CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
       }
-      return res.status(httpConstants.HTTP_STATUS_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        throw new NotFoundError('Карточка с указанным _id не найдена.');
       }
-      return res.send(card);
+      if (!card.owner.equals(req.user._id)) {
+        throw new ForbiddenError('Нельзя удалять чужие карточки.');
+      }
+      return card.deleteOne().then(() => res.send({ message: 'Карточка удалена.' }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некорректный _id для удаления карточки.' });
+        next(new BadRequestError('Передан некорректный _id для удаления карточки.'));
       }
-      return res.status(httpConstants.HTTP_STATUS_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((cards) => {
       if (!cards) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+        throw new NotFoundError('Передан несуществующий _id карточки.');
       }
       return res.send(cards);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+        next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
       }
-      return res.status(httpConstants.HTTP_STATUS_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((cards) => {
       if (!cards) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+        throw new NotFoundError('Передан несуществующий _id карточки.');
       }
       return res.send(cards);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка.' });
+        next(new BadRequestError('Переданы некорректные данные для снятия лайка.'));
       }
-      return res.status(httpConstants.HTTP_STATUS_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
