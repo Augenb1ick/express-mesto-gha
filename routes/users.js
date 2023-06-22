@@ -1,34 +1,11 @@
-const router = require('express').Router();
 const { celebrate, Joi, Segments } = require('celebrate');
+const router = require('express').Router();
+
 const auth = require('../middlewares/auth');
 
 const {
-  getUsers, getUserById, createUser, updateUser, updateAvatar, login, getCurrentUser,
+  getUsers, getUserById, updateUser, updateAvatar, getCurrentUser,
 } = require('../controllers/users');
-
-router.post(
-  '/signup',
-  celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      about: Joi.string().min(2).max(30),
-      avatar: Joi.string().pattern(/^https?:\/\/(www.)?[a-zA-Z0-9-.]+\.[a-zA-Z]{2,}([a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+)*#*$/),
-      email: Joi.string().required().email(),
-      password: Joi.string().required().min(6),
-    }),
-  }),
-  createUser,
-);
-router.post(
-  '/signin',
-  celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required().min(6),
-    }),
-  }),
-  login,
-);
 
 router.use(auth);
 
