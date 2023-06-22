@@ -1,10 +1,12 @@
 const router = require('express').Router();
+const { celebrate, Joi, Segments, errors } = require('celebrate');
 const auth = require('../middlewares/auth');
-const { celebrate, Joi, Segments } = require('celebrate');
 
 const {
   getCards, deleteCard, createCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
+
+router.use(errors());
 
 router.use(auth);
 
