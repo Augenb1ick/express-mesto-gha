@@ -1,12 +1,10 @@
 const router = require('express').Router();
-const { celebrate, Joi, Segments, errors } = require('celebrate');
+const { celebrate, Joi, Segments } = require('celebrate');
 const auth = require('../middlewares/auth');
 
 const {
   getUsers, getUserById, createUser, updateUser, updateAvatar, login, getCurrentUser,
 } = require('../controllers/users');
-
-router.use(errors());
 
 router.post(
   '/signup',
