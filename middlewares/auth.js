@@ -7,13 +7,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 // eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
-  const authorization = req.headers.cookie;
-
-  if (!authorization || !authorization.startsWith('jwt')) {
-    return next(new DeniedError('Необходимо авторизоваться'));
-  }
-
-  const token = authorization.replace('jwt=', '');
+  const token = req.cookies.jwt;
 
   let payload;
   try {

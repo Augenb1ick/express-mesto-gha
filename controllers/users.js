@@ -26,9 +26,9 @@ const getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Введён некорректный _id пользователя'));
+        return next(new BadRequestError('Введён некорректный _id пользователя'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -53,20 +53,20 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
+        return next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       }
       if (err.code === 11000) {
-        next(new ConflictError('Пользователь с таким email уже есть'));
+        return next(new ConflictError('Пользователь с таким email уже есть'));
       }
-      next(err);
+      return next(err);
     });
 };
 
 const updateUser = (req, res, next) => {
-  const { ...updateData } = req.body;
+  const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { ...updateData },
+    { name, about },
     { new: true, runValidators: true },
   )
     .then((user) => {
@@ -77,9 +77,9 @@ const updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
+        return next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -98,9 +98,9 @@ const updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
+        return next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       }
-      next(err);
+      return next(err);
     });
 };
 

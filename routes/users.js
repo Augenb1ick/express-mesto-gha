@@ -1,13 +1,9 @@
 const { celebrate, Joi, Segments } = require('celebrate');
 const router = require('express').Router();
 
-const auth = require('../middlewares/auth');
-
 const {
   getUsers, getUserById, updateUser, updateAvatar, getCurrentUser,
 } = require('../controllers/users');
-
-router.use(auth);
 
 router.get('/', getUsers);
 
@@ -29,9 +25,6 @@ router.patch(
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
-      avatar: Joi.string().pattern(/^https?:\/\/(www.)?[a-zA-Z0-9-.]+\.[a-zA-Z]{2,}([a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+)*#*$/),
-      email: Joi.string().email(),
-      password: Joi.string().min(6),
     }),
   }),
   updateUser,
