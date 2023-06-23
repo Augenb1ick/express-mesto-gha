@@ -7,13 +7,13 @@ const DeniedError = require('../errors/denied-err');
 
 // eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
-  const { authorization } = req.headers;
+  const authorization = req.headers.cookie;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  if (!authorization || !authorization.startsWith('jwt')) {
     return next(new DeniedError('Необходимо авторизоваться'));
   }
 
-  const token = authorization.replace('Bearer ', '');
+  const token = authorization.replace('jwt=', '');
 
   let payload;
   try {
