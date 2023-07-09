@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const cors = require('cors');
 const { errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('./middlewares/errorHandler');
@@ -26,6 +27,19 @@ app.use(limiter);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  cors({
+    origin: [
+      'https://mesto.react.practicum.nomoredomains.work',
+      'http://mesto.react.practicum.nomoredomains.work',
+      'http://localhost:3000',
+    ],
+    credentials: true,
+    methods: 'GET, PUT, PATCH, POST, DELETE',
+    allowedHeaders: ['Content-Type', 'origin', 'Authorization'],
+  }),
+);
 
 app.use('/', require('./routes/index'));
 
